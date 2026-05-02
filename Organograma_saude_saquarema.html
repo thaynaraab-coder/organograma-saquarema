@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Central de Regulação de Saquarema – Pré‑requisitos por Categoria</title>
+    <style>
+        :root {
+            --azul-marinho: #0a1f3f;
+            --vermelho-obs: #c62828;
+            --texto-preto: #000000;
+            --fundo-branco: #ffffff;
+            --borda-clara: #dce4ec;
+            --fundo-cartao: #f5f8fc;
+            --fundo-categoria: #e9eff7;
+            --sombra: 0 4px 18px rgba(0,0,0,0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--fundo-branco);
+            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+            color: var(--texto-preto);
+            padding: 25px 20px 50px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--fundo-branco);
+            border: 1px solid var(--borda-clara);
+            border-radius: 14px;
+            padding: 25px 30px 35px;
+            box-shadow: var(--sombra);
+        }
+
+        h1 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            color: var(--azul-marinho);
+            text-align: center;
+            margin-bottom: 5px;
+            letter-spacing: -0.3px;
+            border-bottom: 3px solid var(--azul-marinho);
+            padding-bottom: 12px;
+        }
+
+        .subtitulo {
+            text-align: center;
+            font-size: 0.95rem;
+            color: #2c3e50;
+            margin-bottom: 22px;
+            font-weight: 500;
+        }
+
+        /* Abas */
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--borda-clara);
+            padding-bottom: 12px;
+            justify-content: center;
+        }
+
+        .tab-button {
+            background: #f0f4f9;
+            border: 1.5px solid #cbd6e5;
+            border-radius: 8px 8px 0 0;
+            padding: 10px 18px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--azul-marinho);
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab-button:hover {
+            background: #e2ebf5;
+            border-color: var(--azul-marinho);
+        }
+
+        .tab-button.active {
+            background: var(--azul-marinho);
+            color: #ffffff;
+            border-color: var(--azul-marinho);
+            box-shadow: 0 3px 10px rgba(10,31,63,0.2);
+        }
+
+        /* Conteúdo da aba */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Árvore vertical */
+        .tree {
+            list-style: none;
+            padding-left: 0;
+            position: relative;
+        }
+        .tree, .tree ul {
+            margin: 0;
+            padding: 0;
+        }
+        .tree li {
+            list-style: none;
+            position: relative;
+            padding: 7px 0 0 28px;
+            margin: 0;
+        }
+        .tree li::before {
+            content: '';
+            position: absolute;
+            top: 16px;
+            left: 8px;
+            width: 14px;
+            height: 2px;
+            background: #b0c4de;
+        }
+        .tree li::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 8px;
+            width: 2px;
+            height: 100%;
+            background: #b0c4de;
+        }
+        .tree li:last-child::after {
+            height: 16px;
+        }
+        .tree > li:first-child::before,
+        .tree > li:first-child::after {
+            display: none;
+        }
+        .tree > li {
+            padding-left: 0;
+            padding-top: 0;
+        }
+
+        /* Nós */
+        .node {
+            display: inline-block;
+            background: var(--fundo-cartao);
+            border: 1.5px solid #cbd6e5;
+            border-radius: 10px;
+            padding: 8px 18px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--azul-marinho);
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            user-select: none;
+            white-space: nowrap;
+            margin-bottom: 4px;
+        }
+        .node:hover {
+            background: #e6eff9;
+            border-color: var(--azul-marinho);
+        }
+        .node.categoria {
+            background: var(--fundo-categoria);
+            border-color: var(--azul-marinho);
+            font-weight: 700;
+            padding: 10px 22px;
+            border-radius: 20px;
+        }
+        .node.exame {
+            background: #ffffff;
+            border-color: #98a9c1;
+            font-weight: 600;
+            color: #1a2e4a;
+            padding: 7px 16px;
+            border-radius: 8px;
+            white-space: normal;
+            max-width: 450px;
+            text-align: left;
+        }
+        .node.subcategoria {
+            background: #eef3f9;
+            border-color: var(--azul-marinho);
+            font-weight: 700;
+            border-radius: 16px;
+            padding: 8px 18px;
+        }
+
+        /* Lista de pré-requisitos */
+        .requisitos-lista {
+            margin: 5px 0 5px 25px;
+            padding-left: 16px;
+            border-left: 2px dashed #b0c4de;
+            list-style: none;
+        }
+        .requisitos-lista li {
+            padding: 3px 0 3px 10px;
+            font-size: 0.85rem;
+            color: var(--texto-preto);
+            position: relative;
+            display: flex;
+            align-items: baseline;
+            flex-wrap: wrap;
+            background: transparent;
+        }
+        .requisitos-lista li::before {
+            content: "•";
+            color: var(--azul-marinho);
+            font-weight: bold;
+            position: absolute;
+            left: -12px;
+            top: 2px;
+        }
+
+        /* Observações */
+        .obs {
+            color: var(--vermelho-obs);
+            font-weight: 600;
+            background: #fff5f5;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 6px;
+            font-size: 0.8rem;
+            border: 1px solid #ffcdd2;
+            display: inline-block;
+            white-space: nowrap;
+        }
+        .obs-bloco {
+            color: var(--vermelho-obs);
+            font-weight: 600;
+            background: #fff5f5;
+            padding: 3px 10px;
+            border-radius: 5px;
+            margin: 6px 0 2px 25px;
+            font-size: 0.8rem;
+            border: 1px solid #ffcdd2;
+            display: inline-block;
+        }
+
+        /* Collapse */
+        .collapsible {
+            cursor: pointer;
+        }
+        .collapsed > ul {
+            display: none;
+        }
+        .toggle-icon {
+            display: inline-block;
+            width: 18px;
+            font-size: 0.85rem;
+            margin-right: 4px;
+            transition: transform 0.2s;
+        }
+        .collapsed > .node .toggle-icon {
+            transform: rotate(-90deg);
+        }
+
+        .footer-note {
+            text-align: right;
+            color: #556677;
+            font-size: 0.8rem;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 700px) {
+            .node.exame {
+                max-width: 280px;
+                font-size: 0.8rem;
+            }
+            .tab-button {
+                font-size: 0.75rem;
+                padding: 8px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏥 Central de Regulação de Saquarema</h1>
+        <p class="subtitulo">Pré‑requisitos para Solicitação de Exames – Visualização por Categoria</p>
+
+        <!-- Abas -->
+        <div class="tabs" id="tabBar">
+            <button class="tab-button active" data-tab="medicina-nuclear">🔬 Medicina Nuclear</button>
+            <button class="tab-button" data-tab="imagens">🖼️ Imagens</button>
+            <button class="tab-button" data-tab="neurologia">🧠 Neurologia</button>
+            <button class="tab-button" data-tab="cardiologia">❤️ Cardiologia</button>
+            <button class="tab-button" data-tab="anatomopatologico">🔬 Anatomopatológico</button>
+            <button class="tab-button" data-tab="gastroenterologia">🍽️ Gastroenterologia</button>
+            <button class="tab-button" data-tab="otorrinolaringologia">👂 Otorrino</button>
+            <button class="tab-button" data-tab="parametros">📏 Parâmetros</button>
+            <button class="tab-button" data-tab="urologia">🚹 Urologia</button>
+        </div>
+
+        <!-- Conteúdo das abas -->
+        <div id="tabContents"></div>
+
+        <p class="footer-note">📅 Atualizado em 2026 · Central de Regulação de Saquarema</p>
+    </div>
+
+    <script>
+        (function() {
+            // Dados organizados em categorias (ordem alfabética dos exames internamente)
+            const dadosCategorias = {
+                'medicina-nuclear': {
+                    titulo: '🔬 Medicina Nuclear',
+                    obsGeral: '⚠️ Todos os pedidos devem estar na guia APAC',
+                    exames: [
+                        { nome: '🧲 RNM de Bacia/Pelve/Abdome superior', requisitos: ['História clínica com CID', 'Exame físico', 'USG pélvico com laudo', 'Justificativa'] },
+                        { nome: '🧲 RNM de Mamas', requisitos: ['História clínica detalhada com CID', 'Exame detalhado', 'USG ou Mamografia prévia'], obs: '⚠️ Mulheres com ALTO índice de CA; idade ≥ 35 anos; Testes positivos BRCA1/BRCA2 – Mutações Genéticas.' },
+                        { nome: '🧲 RNM de MMSS, MMII e Coluna Vertebral', requisitos: ['História clínica detalhada', 'CID', 'Descrição do exame físico', 'RX simples com laudo', 'Justificativa'] }
+                    ]
+                },
+                'imagens': {
+                    titulo: '🖼️ Imagens',
+                    exames: [
+                        { nome: '🌊 Doppler Arterial dos Membros Superiores e Inferiores', requisitos: ['História Clínica detalhada com CID', 'Exame físico', 'RX simples (conforme o caso)'] },
+                        { nome: '🌊 Doppler da Artéria Aorta Abdominal', requisitos: ['História Clínica detalhada com CID', 'Exame físico', 'RX simples (conforme o caso)'] },
+                        { nome: '🌊 Doppler de Artérias Renais', requisitos: ['História Clínica detalhada com CID', 'Exame físico', 'RX simples (conforme o caso)'] },
+                        { nome: '🌊 Doppler de Veias Cervicais', requisitos: ['Exame físico', 'RX simples (conforme o caso)'] },
+                        { nome: '🌊 Doppler Venoso dos Membros Superiores e Inferiores', requisitos: ['História Clínica detalhada com CID', 'Exame físico', 'RX simples (conforme o caso)'] },
+                        { nome: '🎀 Mamografia', requisitos: ['História Clínica detalhada com CID', 'Exame físico', 'USG ou Mamografia prévia (se houver)'] },
+                        { nome: '🩻 USG Abdome Superior', requisitos: ['História Clínica detalhada com CID', 'Exame físico', 'RX Simples conforme caso', 'USG prévio se houver'] },
+                        { nome: '🩻 USG Abdome Total', requisitos: ['História Clínica detalhada com CID', 'Exame físico', 'RX Simples conforme caso'] },
+                        { nome: '🩻 USG Aparelho Urinário', requisitos: ['História Clínica detalhada com CID (compatível com a indicação)', 'Exame físico', 'RX Simples conforme caso', 'USG prévio se houver'] },
+                        { nome: '🩻 USG Articulação', requisitos: ['História Clínica detalhada com CID', 'Exame físico', 'RX Simples (conforme o caso)'] },
+                        { nome: '🩻 USG Bolsa Escrotal', requisitos: ['História Clínica detalhada com CID', 'Exame físico', 'RX Simples'] },
+                        { nome: '🩻 USG de Mamas', requisitos: ['História Clínica detalhada com CID', 'Exame físico', 'USG prévio (se houver)'] },
+                        { nome: '🩻 USG de Parede Abdominal', requisitos: ['História Clínica detalhada com CID', 'Exame físico'] },
+                        { nome: '🩻 USG de Partes Moles', requisitos: ['História Clínica detalhada com CID', 'Exame físico'] },
+                        { nome: '🩻 USG Globo Ocular', requisitos: ['História Clínica detalhada com CID', 'Exame físico'] },
+                        { nome: '🩻 USG Pélvico (Ginecológico)', requisitos: ['História Clínica detalhada com CID', 'Exame físico', 'USG prévio (se houver)'], obs: '⚠️ Deve anteceder a investigação por TC.' },
+                        { nome: '🩻 USG Próstata', requisitos: ['História Clínica detalhada com CID', 'Exame físico (Toque retal)', 'RX Simples', 'PSA', 'USG prévio se houver'] },
+                        { nome: '🩻 USG Tireóide', requisitos: ['História Clínica detalhada com CID', 'Exame físico', 'Exames laboratoriais (TSH, T4 LIVRE)'] },
+                        { nome: '🩻 USG Tórax Extracardíaca', requisitos: ['História Clínica detalhada com CID', 'Exame físico', 'RX do tórax PA/Perfil'] },
+                        { nome: '🩻 USG Transfontanela', requisitos: ['História Clínica detalhada com CID', 'Exame físico', 'RX simples (conforme o caso)'] },
+                        // Subcategoria Obstetrícia (final)
+                        { nome: '🤰 Obstetrícia', isSub: true, subExames: [
+                            { nome: '🩺 Morfológica', requisitos: ['História Clínica detalhada com CID', 'Exame físico', 'Descrição de DUM ou idade gestacional'] },
+                            { nome: '🩺 USG Doppler Fluxo Obstétrico', requisitos: ['História Clínica detalhada com CID', 'Exame físico', 'Descrição de DUM ou idade gestacional'] },
+                            { nome: '🩺 USG Obstétrica', requisitos: ['História Clínica detalhada com CID', 'Exame físico', 'BHCG', 'Descrição de DUM ou idade gestacional'] },
+                            { nome: '🩺 USG Obstétrica com Doppler Colorido e Pulsado', requisitos: ['História Clínica detalhada com CID', 'Exame físico', 'Teste de Gravidez', 'Descrição de DUM ou idade gestacional'] },
+                            { nome: '🩺 USG Transvaginal (USGTV)', requisitos: ['História Clínica detalhada com CID', 'Exame físico', 'RX simples (conforme o caso)', 'USG prévio (se houver)', 'Descrição de DUM ou idade gestacional (em caso de gestação)'] }
+                        ]}
+                    ]
+                },
+                'neurologia': {
+                    titulo: '🧠 Neurologia',
+                    exames: [
+                        { nome: '📈 EEG', requisitos: ['História Clínica detalhada com CID', 'Exame físico com ênfase nos dados neurológicos, principalmente os focais'], obs: '⚠️ EEG com mapeamento só será autorizado após a apresentação de laudo de EEG SIMPLES.' },
+                        { nome: '⚡ ENMG (Eletroneuromiografia)', requisitos: ['História Clínica', 'Quadros cirúrgicos', 'Diagnósticos e Prognósticos', 'USG com laudo'] }
+                    ]
+                },
+                'cardiologia': {
+                    titulo: '❤️ Cardiologia',
+                    obsGeral: '⚠️ Formulário na Guia de Referência ou Requisição de Exames.',
+                    exames: [
+                        { nome: '🕒 Holter 24h', requisitos: ['História Clínica detalhada com CID', 'Exame físico', 'Teste Ergométrico ou Ecocardiograma (se houver)'] },
+                        { nome: '📅 Mapa 24h', requisitos: ['História Clínica detalhada com CID', 'Exame físico detalhado', 'ECG', 'Teste Ergométrico ou Ecocardiograma (se houver)'] },
+                        { nome: '🏃 Teste Ergométrico', requisitos: ['História Clínica detalhada com CID', 'Exame físico', 'ECG'] }
+                    ]
+                },
+                'anatomopatologico': {
+                    titulo: '🔬 Anatomopatológico',
+                    exames: [
+                        { nome: '🧬 Biópsia de Mama por Agulha Grossa (Core Biopsy)', requisitos: ['História Clínica detalhada com CID', 'Exame físico', 'USG de Mamas/Mamografia/RNM'] },
+                        { nome: '🧬 Biópsia de Próstata', requisitos: ['História Clínica detalhada com CID', 'Exame físico (Toque retal)', 'PSA', 'USG Próstata'] },
+                        { nome: '💉 PAAF (Punção Aspirativa por Agulha Fina – Tireoide)', requisitos: ['História Clínica detalhada com CID', 'Exame físico', 'USG', 'Hormônios Tireoidianos (TSH + T4 LIVRE)'] },
+                        { nome: '💉 PAMAF (Punção Aspirativa de Mama por Agulha Fina)', requisitos: ['História Clínica detalhada com CID', 'Exame físico', 'USG de Mama/Mamografia/RNM Mama'] }
+                    ]
+                },
+                'gastroenterologia': {
+                    titulo: '🍽️ Gastroenterologia',
+                    exames: [
+                        { nome: '🔍 EDA (Endoscopia digestiva alta)', requisitos: ['História Clínica detalhada com CID', 'Exame físico com ênfase no aparelho digestivo', 'História da Patologia Pregressa e Familiar'] },
+                        { nome: '🔎 Retossigmoidoscopia', requisitos: ['História Clínica detalhada com CID', 'Exame físico'] }
+                    ]
+                },
+                'otorrinolaringologia': {
+                    titulo: '👂 Otorrinolaringologia',
+                    exames: [
+                        { nome: '🎧 Audiometria de Campo Livre, Tonal/Vocal, Avaliação Auditiva Comportamental', requisitos: ['História Clínica detalhada com CID', 'Exame físico'] },
+                        { nome: '⚡ BERA/PEATE', requisitos: ['História Clínica detalhada com CID', 'Exame físico'] },
+                        { nome: '👃 Endoscopia Nasal', requisitos: ['História Clínica detalhada com CID', 'Exame clínico'] },
+                        { nome: '📉 Impedanciometria ou Imitanciometria ou Timpanometria', requisitos: ['História Clínica detalhada com CID', 'Exame físico', 'Audiometria'] },
+                        { nome: '🌀 Vectoeletronistagmografia', requisitos: ['História Clínica detalhada com CID', 'Exame físico', 'RX (conforme o caso)'] },
+                        { nome: '🎤 Videolaringoscopia', requisitos: ['História Clínica detalhada com CID', 'Exame Otorrinolaringológico completo'] }
+                    ]
+                },
+                'parametros': {
+                    titulo: '📏 Parâmetros',
+                    exames: [
+                        { nome: '❤️ Cintilografia do Sistema Cárdio Vascular', requisitos: ['História Clínica detalhada com CID', 'Doppler do Vaso Periférico', 'ECG com laudo', 'Ecocardiografia com laudo', 'Teste ergométrico com laudo', 'CAT (se indicado)'] },
+                        { nome: '🧪 Cintilografia do Sistema Endócrino', requisitos: ['História Clínica detalhada com CID', 'Exame físico', 'Exames laboratoriais', 'USG'] },
+                        { nome: '🦴 Densitometria', requisitos: ['História Clínica detalhada com CID', 'Exames laboratoriais (distúrbios hormonais)', 'RX Simples (fraturas)'], obs: '⚠️ Paciente acima de 65 anos não necessita de pré-requisitos.' }
+                    ]
+                },
+                'urologia': {
+                    titulo: '🚹 Urologia',
+                    exames: [
+                        { nome: '📊 Estudo Urodinâmico', requisitos: ['História Clínica detalhada com CID', 'Exame físico'], obs: '⚠️ Prioridades: Pacientes prostáticos com insuficiência renal. Sequência de AVC e TRM com insuficiência renal (creatinina ≥ 1,5 mg/dl).' },
+                        { nome: '🚿 Uretrocistografia miccional', requisitos: ['História Clínica detalhada com CID', 'Exame físico', 'RX contrastado (se houver)', 'USG aparelho urinário inferior ou pelve (se houver)'] },
+                        { nome: '💧 Urografia Excretora', requisitos: ['História Clínica detalhada com CID', 'Exame físico', 'RX de abdômen com laudo', 'USG Rins/Vias urinárias'] }
+                    ]
+                }
+            };
+
+            // Ordenar exames alfabeticamente (já estão, mas garantindo)
+            Object.keys(dadosCategorias).forEach(key => {
+                dadosCategorias[key].exames.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+                // Ordenar subexames também
+                dadosCategorias[key].exames.forEach(exame => {
+                    if (exame.subExames) {
+                        exame.subExames.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+                    }
+                });
+            });
+
+            const tabContents = document.getElementById('tabContents');
+
+            // Construir HTML de cada aba
+            Object.keys(dadosCategorias).forEach(catKey => {
+                const cat = dadosCategorias[catKey];
+                const div = document.createElement('div');
+                div.className = 'tab-content';
+                div.id = 'tab-' + catKey;
+                div.innerHTML = gerarArvore(cat);
+                tabContents.appendChild(div);
+            });
+
+            function gerarArvore(cat) {
+                let html = '<ul class="tree"><li>';
+                html += `<span class="node categoria">${cat.titulo}</span>`;
+                if (cat.obsGeral) {
+                    html += `<div class="obs-bloco">${cat.obsGeral}</div>`;
+                }
+                html += '<ul>';
+                cat.exames.forEach(exame => {
+                    if (exame.isSub) {
+                        // Subcategoria
+                        html += '<li class="collapsible">';
+                        html += `<span class="node subcategoria" onclick="toggleNode(this)"><span class="toggle-icon">▼</span> ${exame.nome}</span>`;
+                        html += '<ul>';
+                        exame.subExames.forEach(sub => {
+                            html += '<li class="collapsible">';
+                            html += `<span class="node exame" onclick="toggleNode(this)"><span class="toggle-icon">▼</span> ${sub.nome}</span>`;
+                            html += '<ul class="requisitos-lista">';
+                            sub.requisitos.forEach(req => {
+                                html += `<li>${req}</li>`;
+                            });
+                            if (sub.obs) {
+                                html += `<li><span class="obs">${sub.obs}</span></li>`;
+                            }
+                            html += '</ul></li>';
+                        });
+                        html += '</ul></li>';
+                    } else {
+                        html += '<li class="collapsible">';
+                        html += `<span class="node exame" onclick="toggleNode(this)"><span class="toggle-icon">▼</span> ${exame.nome}</span>`;
+                        html += '<ul class="requisitos-lista">';
+                        exame.requisitos.forEach(req => {
+                            html += `<li>${req}</li>`;
+                        });
+                        if (exame.obs) {
+                            html += `<li><span class="obs">${exame.obs}</span></li>`;
+                        }
+                        html += '</ul></li>';
+                    }
+                });
+                html += '</ul></li></ul>';
+                return html;
+            }
+
+            // Função toggle
+            window.toggleNode = function(element) {
+                const li = element.parentElement;
+                li.classList.toggle('collapsed');
+            };
+
+            // Adicionar ícones de toggle
+            document.querySelectorAll('.collapsible .node').forEach(node => {
+                if (!node.querySelector('.toggle-icon')) {
+                    const icon = document.createElement('span');
+                    icon.className = 'toggle-icon';
+                    icon.textContent = '▼';
+                    node.prepend(icon);
+                }
+            });
+
+            // Lógica das abas
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const allContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tabId = btn.getAttribute('data-tab');
+                    // Atualizar botões
+                    tabButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    // Mostrar conteúdo
+                    allContents.forEach(c => c.classList.remove('active'));
+                    const target = document.getElementById('tab-' + tabId);
+                    if (target) target.classList.add('active');
+                });
+            });
+
+            // Ativar primeira aba
+            document.querySelector('.tab-button.active')?.click();
+            if (!document.querySelector('.tab-button.active')) {
+                tabButtons[0]?.click();
+            }
+        })();
+    </script>
+</body>
+</html>
